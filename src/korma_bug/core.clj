@@ -22,7 +22,19 @@
   (belongs-to baz2 {:fk :baz2_id}))
 
 (defn -main [& args]
+  ;; fails to find table 'foo', if any two of the 'with' is removed,
+  ;; the query succeeds
+  (print "\nadding just bar works:\n")
+  (print (select foo
+                 (with bar (fields :bar_name))))
+  (print "\nadding just baz1 works:\n")
+  (print (select foo
+                 (with baz1 (fields [:baz_name :baz1_name]))))
+  (print "\nadding just baz2 works:\n")
+  (print (select foo
+                 (with baz2 (fields [:baz_name :baz1_name]))))
+  (print "\nadding any combination of two or more fails:\n")
   (print (select foo
                  (with bar (fields :bar_name))
-                 (with baz1 (fields [:baz_name :baz1_name]))
-                 (with baz2 (fields [:baz_name :baz2_name])))))
+                 (with baz1 (fields [:baz_name :baz1_name])))))
+                 ;(with baz2 (fields [:baz_name :baz2_name])))))
