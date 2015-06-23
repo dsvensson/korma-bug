@@ -2,6 +2,17 @@
     (:require [korma.core :refer :all]
               [korma.db :refer :all]))
 
+;; This nasty hack "fixes" the problem...
+;;
+;; (in-ns 'korma.sql.utils)
+;; (defn left-assoc [vs]
+;;   (loop [ret "" [v & vs] vs]
+;;     (cond
+;;       (nil? v) ret
+;;       (nil? vs) (str ret v)
+;;       :else (recur (str ret v) vs))))
+;; (in-ns 'korma-bug.core)
+
 (defdb db (sqlite3 {:db "foo.db"}))
 
 (defentity baz1
@@ -31,11 +42,19 @@
   (print "\nadding just baz2 works:\n")
   (print (select foo
                  (with baz2 (fields [:baz_name :baz2_name]))))
+  (print "\n\n")
   (print "\nadding any combination of two or more belongs-to links fails, but dry-run looks fine and works in sqlite3 cli:\n")
-  (print (dry-run (select foo
-                          (with bar (fields :bar_name))
-                          (with baz1 (fields [:baz_name :baz1_name])))))
-  (print (select foo
-                 (with bar (fields :bar_name))
-                 (with baz1 (fields [:baz_name :baz1_name])))))
-                 ;(with baz2 (fields [:baz_name :baz2_name])))))
+  (try
+    (print "\nrunning:\n")
+    (print (dry-run (select foo
+                            (with bar (fields :bar_name))
+                            (with baz1 (fields [:baz_name :baz1_name]))
+                            (with baz2 (fields [:baz_name :baz2_name])))))
+    (print "\nnow:\n")
+    (print (select foo
+                   (with bar (fields :bar_name))
+                   (with baz1 (fields [:baz_name :baz1_name]))
+                   (with baz2 (fields [:baz_name :baz2_name]))))
+    (print "\npassed, monkey-patch in use!\n")
+    (catch Exception e
+      (print "\nbug triggered\n" (.getMessage e)))))
