@@ -31,7 +31,10 @@
   (print "\nadding just baz2 works:\n")
   (print (select foo
                  (with baz2 (fields [:baz_name :baz2_name]))))
-  (print "\nadding any combination of two or more belongs-to links fails:\n")
+  (print "\nadding any combination of two or more belongs-to links fails, but dry-run looks fine and works in sqlite3 cli:\n")
+  (print (dry-run (select foo
+                          (with bar (fields :bar_name))
+                          (with baz1 (fields [:baz_name :baz1_name])))))
   (print (select foo
                  (with bar (fields :bar_name))
                  (with baz1 (fields [:baz_name :baz1_name])))))
